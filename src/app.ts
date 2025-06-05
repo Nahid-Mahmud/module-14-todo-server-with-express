@@ -69,4 +69,18 @@ app.patch("/todos/:id", (req: Request, res: Response) => {
   res.status(200).json({ message: "Todo updated successfully", todo });
 });
 
+app.delete("/todos/:id", (req: Request, res: Response) => {
+  const id = req.params.id;
+  const allTodos = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  const findTodo = allTodos.find((t: { id: string }) => t.id === id);
+  if (!findTodo) {
+    res.status(404).json({ message: "Todo not found" });
+  }
+  const todoWithoutId = allTodos.filter((t: { id: string }) => t.id !== id);
+
+  fs.writeFileSync(filePath, JSON.stringify(todoWithoutId, null, 4), "utf-8");
+
+  res.status(200).json({ message: "Todo deleted successfully" });
+});
+
 export default app;
