@@ -5,6 +5,11 @@ import path from "path";
 
 app.use(express.json());
 
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 const filePath = path.join(__dirname, "../src/db/todo.json");
 
 app.get("/", (req: Request, res: Response) => {
@@ -34,6 +39,34 @@ app.post("/todos/create-todo", (req: Request, res: Response) => {
 
   //   res.send("Hello, World!");
   res.status(201).json({ message: "Todo created successfully", todo: newTodo });
+});
+
+app.get("/todos/:id", (req: Request, res: Response) => {
+  const allTodos = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+
+  const requestedTodoId = req.params.id;
+
+  const todo = allTodos.find((t: { id: string }) => t.id === requestedTodoId);
+
+  if (!todo) {
+    res.status(404).json({ message: "Todo not found" });
+  }
+
+  res.status(200).json(todo);
+});
+
+app.patch("/todos/:id", (req: Request, res: Response) => {
+  const id = req.params.id;
+  const { title } = req.body;
+  const allTodos = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+
+  const todo = allTodos.find((t: { id: string }) => t.id === id);
+  if (!todo) {
+    res.status(404).json({ message: "Todo not found" });
+  }
+  todo.title = title;
+  fs.writeFileSync(filePath, JSON.stringify(allTodos, null, 4), "utf-8");
+  res.status(200).json({ message: "Todo updated successfully", todo });
 });
 
 export default app;
