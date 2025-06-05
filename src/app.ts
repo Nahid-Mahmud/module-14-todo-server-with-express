@@ -4,11 +4,20 @@ import fs from "fs";
 import path from "path";
 
 app.use(express.json());
+const todosRouter = express.Router();
 
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
+app.use("/todos", todosRouter);
+
+todosRouter.get("/", (req: Request, res: Response) => {
+  const data = fs.readFileSync(filePath, "utf-8");
+  const todos = JSON.parse(data);
+
+  res.json({
+    todos,
+    message: "Todos fetched successfully",
+  });
 });
+
 
 const filePath = path.join(__dirname, "../src/db/todo.json");
 
