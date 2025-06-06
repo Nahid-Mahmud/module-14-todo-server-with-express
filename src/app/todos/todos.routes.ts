@@ -6,8 +6,6 @@ import { ObjectId } from "mongodb";
 
 const todosRouter = express.Router();
 
-const filePath = path.join(__dirname, "../../../src/db/todo.json");
-
 todosRouter.get("/", async (req: Request, res: Response) => {
   const db = client.db("todoDb");
   const collection = db.collection("todos");
@@ -61,8 +59,36 @@ todosRouter.get("/:id", async (req: Request, res: Response) => {
 
 // update todo
 
-todosRouter.patch("/:id", (req: Request, res: Response) => {
+todosRouter.patch("/:id", async (req: Request, res: Response) => {
   const id = req.params.id;
+  // const { title, description, priority, isCompleted } = req.body;
+
+  const updateFields = Object.keys(req.body);
+
+  const db = await client.db("todoDb");
+  const collection = await db.collection("todos");
+
+  const updateData: any = {};
+  updateFields.forEach((field) => {
+    updateData[field] = req.body[field];
+  });
+
+  const result = await collection.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: updateData },
+    {
+      upsert: true,
+    }
+  );
+
+  if (result.matchedCount === 0) {
+    res.status(404).json({ message: "Todo not found" });
+  }
+
+  res.status(200).json({
+    message: "Todo updated successfully",
+    result,
+  });
 });
 
 todosRouter.delete("/:id", async (req: Request, res: Response) => {
