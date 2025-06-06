@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
+import { client } from "../../config/mongodb";
 
 const todosRouter = express.Router();
 
@@ -16,21 +17,24 @@ todosRouter.get("/", (req: Request, res: Response) => {
   });
 });
 
-todosRouter.post("/create-todo", (req: Request, res: Response) => {
-  const { title } = req.body;
-  console.log(title);
-  const id = crypto.randomUUID();
-  const createdAt = new Date().toISOString();
-  const newTodo = { id, title, createdAt };
-  const data = fs.readFileSync(filePath, "utf-8");
-  const todos = JSON.parse(data);
+todosRouter.post("/create-todo", async (req: Request, res: Response) => {
+  // const { title, body } = req.body;
+  // console.log(title);
+  const db = await client.db("todoDb");
 
-  todos.push(newTodo);
-  console.log(todos);
-  fs.writeFileSync(filePath, JSON.stringify(todos, null, 4), "utf-8");
+  const collection = db.collection("todos");
+
+  await collection.insertOne({
+    title: "Mongodb",
+    description: "Learning Mongodb",
+    priority: "High",
+    isCompleted: false,
+  });
+
+  const todos = collection.find({}).toArray();
 
   //   res.send("Hello, World!");
-  res.status(201).json({ message: "Todo created successfully", todo: newTodo });
+  res.status(201).json(todos);
 });
 
 todosRouter.get("/:id", (req: Request, res: Response) => {

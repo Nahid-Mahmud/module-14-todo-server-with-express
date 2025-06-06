@@ -1,5 +1,5 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
-
+import "dotenv/config";
 const uri = process.env.MONGODB_URI as string;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
