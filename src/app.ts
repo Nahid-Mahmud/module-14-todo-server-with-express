@@ -3,8 +3,10 @@ const app: Application = express();
 import fs from "fs";
 import path from "path";
 import todosRouter from "./app/todos/todos.routes";
+import morgan from "morgan";
 
 app.use(express.json());
+app.use(morgan("combined"));
 
 const customLogger = (req: Request, res: Response, next: NextFunction) => {
   const logMessage = `${new Date().toISOString()} - ${req.method} ${req.originalUrl}`;
