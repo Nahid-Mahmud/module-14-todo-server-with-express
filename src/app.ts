@@ -6,10 +6,17 @@ import todosRouter from "./app/todos/todos.routes";
 
 app.use(express.json());
 
+const customLogger = (req: Request, res: Response, next: Function) => {
+  const logMessage = `${new Date().toISOString()} - ${req.method} ${req.originalUrl}`;
+  console.log(logMessage);
+
+  next();
+};
+
 app.use("/todos", todosRouter);
 
-app.get("/", (req: Request, res: Response) => {
-  console.log(req, res);
+app.get("/", customLogger, (req: Request, res: Response) => {
+  // console.log(req, res);
   res.send("Welcome to the Todo API!");
 });
 
